@@ -11,6 +11,18 @@ describe 'parser' do
   let(:values_6) { {text_1: 't1_value', text_2: 't2_value [TEXT_1]', text_3: 't3_value [TEXT_2]', text_4: 't4_value [TEXT_3]'} }
   let(:values_7) { {text_1: 't1_value [TEXT_2] [TEXT_3] [TEXT_4]', text_2: 't2_value [TEXT_3]', text_3: 't3_value [TEXT_4]', text_4: 't4_value'} }
 
+  let(:values_8) do
+    { text_1: 't1_value [TEXT_2] [TEXT_3] [TEXT_4]', text_2: 't2_value [TEXT_3]',
+      text_3: 't3_value [TEXT_4]', text_4: 't4_value[TEXT_5]',
+      text_5: 't5_value[TEXT_6]', text_6: 't6_value [NUMBER_1]' }
+  end
+
+  let(:values_9) do
+    { text: 't1_value [TEXT_2] [TEXT_3] [TEXT_4]', text_2: 't2_value [TEXT_3]',
+      text_3: 't3_value [TEXT_4]', text_4: 't4_value [TEXT_4]'}
+  end
+
+
   context 'parse one level data' do
 
     subject { process_values(values) }
@@ -68,6 +80,30 @@ describe 'parser' do
 
     it 'process data' do
       expect(subject).to include(text_1: 't1_value t2_value t3_value t4_value t3_value t4_value t4_value', text_2: 't2_value t3_value t4_value', text_3: 't3_value t4_value', text_4: 't4_value')
+    end
+  end
+
+  describe 'few references and 3 level' do
+    subject { process_values(values_8) }
+
+    it 'process data' do
+      expect(subject).to include(text_1: 't1_value t2_value t3_value t4_valuet5_valuet6_value [NUMBER_1] t3_value t4_valuet5_valuet6_value [NUMBER_1] t4_valuet5_valuet6_value [NUMBER_1]',
+                                 text_2: 't2_value t3_value t4_valuet5_valuet6_value [NUMBER_1]',
+                                 text_3: 't3_value t4_valuet5_valuet6_value [NUMBER_1]',
+                                 text_4: 't4_valuet5_valuet6_value [NUMBER_1]',
+                                 text_5: 't5_valuet6_value [NUMBER_1]',
+                                 text_6: 't6_value [NUMBER_1]')
+    end
+  end
+
+  describe 'few references and 3 level' do
+    subject { process_values(values_9) }
+
+    it 'process data' do
+      expect(subject).to include( text: 't1_value t2_value t3_value t4_value [TEXT_4] t3_value t4_value [TEXT_4] t4_value [TEXT_4]',
+                                  text_2: 't2_value t3_value t4_value [TEXT_4]',
+                                  text_3: 't3_value t4_value [TEXT_4]',
+                                  text_4: 't4_value [TEXT_4]')
     end
   end
 end
