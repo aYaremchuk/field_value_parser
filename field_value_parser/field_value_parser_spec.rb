@@ -8,7 +8,10 @@ describe 'parser' do
   let(:values_5) { { text_1: 'text1_value [TEXT_2]', text_2: 'text2_value [TEXT_3] [TEXT_2]',
                      text_3: 'text3_value [TEXT_4]', text_4: 'text4_value' } }
 
-  describe 'parse one level data' do
+  let(:values_6) { {text_1: 't1_value', text_2: 't2_value [TEXT_1]', text_3: 't3_value [TEXT_2]', text_4: 't4_value [TEXT_3]'} }
+  let(:values_7) { {text_1: 't1_value [TEXT_2] [TEXT_3] [TEXT_4]', text_2: 't2_value [TEXT_3]', text_3: 't3_value [TEXT_4]', text_4: 't4_value'} }
+
+  context 'parse one level data' do
 
     subject { process_values(values) }
 
@@ -17,17 +20,17 @@ describe 'parser' do
     end
   end
 
-  describe 'few levels' do
+  context 'few levels' do
     subject { process_values(values_2) }
 
     it 'process data' do
       expect(subject).to include( text_2: 'text2_value text1_value 2',
-                                          text_1: 'text1_value 2',
-                                          number_1: '2')
+                                  text_1: 'text1_value 2',
+                                  number_1: '2')
     end
   end
 
-  describe 'some data not found' do
+  context 'some data not found' do
     subject { process_values(values_3) }
 
     it 'process data' do
@@ -35,7 +38,7 @@ describe 'parser' do
     end
   end
 
-  describe 'reference for self' do
+  context 'reference for self' do
     subject { process_values(values_4) }
 
     it 'process data' do
@@ -43,14 +46,28 @@ describe 'parser' do
     end
   end
 
-  describe '3 level' do
+  context '3 level' do
     subject { process_values(values_5) }
 
     it 'process data' do
-      expect(subject).to include( text_1: 'text1_value text2_value text3_value text4_value [TEXT_2]',
-                                          text_2: 'text2_value text3_value text4_value [TEXT_2]',
-                                          text_3: 'text3_value text4_value',
-                                          text_4: 'text4_value')
+      expect(subject).to include( text_1: 'text1_value text2_value text3_value text4_value [TEXT_2]', text_2: 'text2_value text3_value text4_value [TEXT_2]',
+                                  text_3: 'text3_value text4_value', text_4: 'text4_value')
+    end
+  end
+
+  context 'few' do
+    subject { process_values(values_6) }
+
+    it 'process data' do
+      expect(subject).to include(text_1: 't1_value', text_2: 't2_value t1_value', text_3: 't3_value t2_value t1_value', text_4: 't4_value t3_value t2_value t1_value')
+    end
+  end
+
+  context 'few' do
+    subject { process_values(values_7) }
+
+    it 'process data' do
+      expect(subject).to include(text_1: 't1_value t2_value t3_value t4_value t3_value t4_value t4_value', text_2: 't2_value t3_value t4_value', text_3: 't3_value t4_value', text_4: 't4_value')
     end
   end
 end
