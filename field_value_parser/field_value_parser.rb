@@ -10,8 +10,11 @@ def make_replaces(text, self_key, fields)
   text.scan(/\[(.*?)\]/).flatten.each do |entry_name|
     key = entry_name.downcase.to_sym
     next if key == self_key || fields[key].nil?
-    entry = make_replaces fields[key], key, fields
-    text.gsub!("[#{entry_name}]", entry)
+    entry = make_replaces fields[key].dup, key, fields
+    # protect already replaced from replacing
+    entry.gsub! /\[(.*?)\]/, '%%\1%%'
+    text.gsub! "[#{entry_name}]", entry
   end
-  text
+  # remove already replaced protection
+  text.gsub /%%(.*?)%%/, '[\1]'
 end
