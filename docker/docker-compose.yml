@@ -1,0 +1,5 @@
+fvp_ruby:
+    image: ruby:2.3
+    volumes:
+        - ../:/var/www
+    tty: true
